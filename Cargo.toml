@@ -10,3 +10,4 @@ license = "MIT"
 [dependencies]
 chrono = "0.4.23"
 genpdf = "0.2.0"
+azul-text-layout = "0.0.4"

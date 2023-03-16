@@ -1,3 +1,4 @@
+extern crate azul_text_layout;
 extern crate chrono;
 extern crate genpdf;
 
@@ -9,6 +10,16 @@ struct Instance {
     name: String,
     street: String,
     city: String,
+}
+
+impl Instance {
+    fn get_layout(&self) -> elements::PaddedElement<elements::LinearLayout> {
+        let mut layout = elements::LinearLayout::vertical();
+        layout.push(elements::Paragraph::new(&self.name));
+        layout.push(elements::Paragraph::new(&self.street));
+        layout.push(elements::Paragraph::new(&self.city));
+        elements::PaddedElement::new(layout, genpdf::Margins::trbl(10, 0, 10, 0))
+    }
 }
 
 impl fmt::Display for Instance {
@@ -29,8 +40,14 @@ impl std::clone::Clone for Instance {
 
 struct Position {
     name: String,
-    amount: i32,
-    price: i32,
+    quantity: f32,
+    unit_price: f32,
+}
+
+impl Position {
+    fn calculate_full_price(&self) -> f32 {
+        self.quantity * self.unit_price
+    }
 }
 
 struct Invoice {
@@ -54,7 +71,8 @@ impl Invoice {
             elements::Text::new("Invoice"),
             style::Effect::Bold,
         ));
-        doc.push(elements::Paragraph::new(&self.sender.name));
+        doc.push(self.sender.get_layout());
+        doc.push(self.receiver.get_layout());
         doc.render_to_file(format!("target/{}", name))
             .expect("Failed to write PDF file");
     }
@@ -74,8 +92,8 @@ fn main() {
         output_date: NaiveDate::from_ymd_opt(2022, 12, 6).unwrap(),
         positions: vec![Position {
             name: String::from("Book"),
-            amount: 1,
-            price: 10,
+            amount: 1.,
+            price: 10.,
         }],
     };
     invoice.pdf("invoice.pdf");
